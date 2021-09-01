@@ -1,3 +1,17 @@
+CREATE DATABASE mercado;
+
+USE mercado;
+
+CREATE TABLE categoria (
+idcategoria int not null primary key auto_increment,
+descricao VARCHAR(45)
+);
+
+INSERT INTO categoria (descricao)
+VALUES ('Higiene pessoal'),('Limpeza'),('Cama, mesa e banho'),('Frios'), ('Bazar');
+
+/*ot 02*/
+
 CREATE TABLE produto(
 idproduto int not null primary key auto_increment,
 descricao VARCHAR(45),
