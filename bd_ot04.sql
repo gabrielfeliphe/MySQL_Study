@@ -322,3 +322,95 @@ CREATE VIEW view_estoque as SELECT categoria.descricao as descri_cat, produto.de
 INNER JOIN categoria on categoria.idcategoria = produto.idcategoria;
 
 select * from view_estoque;
+
+
+/*1- Agora, crie uma trigger para que quando o salário de um vendedor seja
+alterado, ele não possa ser menor do que o já cadastrado.*/
+
+DELIMITER $$
+
+CREATE TRIGGER salario_alteracao BEFORE UPDATE ON vendedor
+FOR EACH ROW 
+begin
+	if (new.salario < old.salario) THEN
+		SET NEW.salario = OLD.salario;
+	end if;
+end$$
+
+DELIMITER ;
+
+SELECT * FROM view_adm;
+
+UPDATE vendedor 
+set salario = 9
+where idvendedor = 3;
+    
+/*2- Crie uma trigger para que quando seja inserido um novo vendedor altere
+o salário dele para R$998,00*/
+
+
+drop trigger salario_novo;
+
+DELIMITER $$
+
+CREATE TRIGGER salario_novo BEFORE INSERT ON vendedor
+FOR EACH ROW 
+begin
+    SET new.salario = 998;
+end$$
+
+DELIMITER ;
+
+INSERT INTO vendedor(nome,data_nasc,idendereco)
+VALUES('JOCATECIRKLAUDIO BRUNO','1990-04-04',4);
+
+
+SELECT * FROM view_adm;
+
+/*3- Crie uma trigger para que quando um vendedor for deletado do banco
+seja inserido um novo vendedor com o salário igual a R$10,00;*/
+
+/*DROP TRIGGER delete_vendedor;
+
+DELIMITER $$
+
+CREATE TRIGGER delete_vendedor BEFORE DELETE ON vendedor
+for each row
+BEGIN
+SET new.nome= 'teste';
+set new.salario = '10';
+end$$
+
+DELIMITER ;
+
+DELETE FROM vendedor
+WHERE idvendedor = 10;*/ 
+
+/*ESTA TRIGGER NÃO PODE SER FEITA, não passa de uma linda pegadinha dos professores*/
+
+SELECT * FROM view_adm;
+
+
+/*4- Imagine alguma outra situação onde seja interessante criar uma trigger, dentro
+da proposta em que estamos trabalhando e faça-a.*/
+
+DELIMITER $$
+
+CREATE TRIGGER salario_teto BEFORE UPDATE ON vendedor
+FOR EACH ROW 
+begin
+	if (new.salario > 5000) THEN
+		SET NEW.salario = OLD.salario;
+	end if;
+end$$
+
+DELIMITER ;
+
+INSERT INTO vendedor(nome,data_nasc,idendereco)
+VALUES('bruno','1990-04-04',4);
+
+UPDATE vendedor
+SET salario = 5001
+where idvendedor = 11;
+
+SELECT * FROM view_adm;
