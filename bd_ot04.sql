@@ -348,9 +348,6 @@ where idvendedor = 3;
 /*2- Crie uma trigger para que quando seja inserido um novo vendedor altere
 o salário dele para R$998,00*/
 
-
-drop trigger salario_novo;
-
 DELIMITER $$
 
 CREATE TRIGGER salario_novo BEFORE INSERT ON vendedor
@@ -371,18 +368,14 @@ SELECT * FROM view_adm;
 seja inserido um novo vendedor com o salário igual a R$10,00;*/
 
 /*DROP TRIGGER delete_vendedor;
-
 DELIMITER $$
-
 CREATE TRIGGER delete_vendedor BEFORE DELETE ON vendedor
 for each row
 BEGIN
 SET new.nome= 'teste';
 set new.salario = '10';
 end$$
-
 DELIMITER ;
-
 DELETE FROM vendedor
 WHERE idvendedor = 10;*/ 
 
@@ -414,3 +407,89 @@ SET salario = 5001
 where idvendedor = 11;
 
 SELECT * FROM view_adm;
+
+/*OT 08*/
+
+/*1-Agora, crie uma procedure para atualizar o preço de um produto. Para
+isso, a procedure deve receber o id do produto e o novo preço dele.*/
+
+DELIMITER $$
+
+CREATE PROCEDURE atualizar_preco_produto(IN novo_valor FLOAT, IN idproduto_ INT)
+BEGIN 
+UPDATE produto
+SET preco = novo_valor
+where idproduto = idproduto_;
+END$$
+
+DELIMITER ;
+
+CALL atualizar_preco_produto (350,1);
+
+select * from view_estoque;
+
+/*2- Crie uma procedure onde aumente o valor de todos os produtos em 10%;*/
+
+DELIMITER $$
+
+CREATE PROCEDURE aumento10_p()
+BEGIN
+SET SQL_SAFE_UPDATES = 0;
+UPDATE produto
+set preco = preco*1.1; /*10%*/
+SET SQL_SAFE_UPDATES = 1;
+END$$
+
+DELIMITER ;
+
+select * from view_estoque;
+
+call aumento10_p;
+
+
+/*3- Crie uma procedure onde some a quantidade vendida de um produto e
+aumente o valor do mesmo utilizando a soma da quantidade como
+porcentagem, ou seja, se foram vendidas 15 escovas de dente o valor de
+escova de dente deve aumentar em 15%;*/
+
+DELIMITER $$
+
+CREATE PROCEDURE aumento_preco_perc(IN idproduto_ INT)
+BEGIN
+
+UPDATE produto ,(SELECT SUM(vendas_has_produto.quantidade) as totalVendas from vendas
+INNER JOIN vendas_has_produto on vendas_has_produto.idvenda = vendas.idvenda
+INNER JOIN produto on produto.idproduto = vendas_has_produto.idproduto
+WHERE produto.idproduto = idproduto_) as totalVendas
+SET preco = preco+(preco*(totalVendas/100))
+WHERE idproduto = idproduto_;
+
+END$$
+
+DELIMITER ;
+
+CALL aumento_preco_perc(1);
+
+select * from view_estoque;
+
+
+/*4- Da mesma forma que você fez para view e trigger, imagine alguma outra
+situação onde seja interessante criar uma procedure, dentro da proposta em
+que estamos trabalhando e faça-a.*/
+
+DELIMITER $$
+
+CREATE PROCEDURE promocaoVendedor_pct10(IN idvendedor_ INT)
+BEGIN
+UPDATE vendedor
+set salario = salario*1.1
+WHERE idvendedor = idvendedor_;
+END$$
+
+DELIMITER ;
+
+SELECT * FROM view_adm;
+
+call promocaoVendedor_pct10(2);
+
+
